@@ -1,47 +1,228 @@
+
+---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  annotations:
-    controller-gen.kubebuilder.io/version: v0.4.1
-  creationTimestamp: null
-  name: newkinds.my.group.com
+  name: servertasks.apps.nova.io
 spec:
-  group: my.group.com
+  group: apps.nova.io
   names:
-    kind: NewKind
-    listKind: NewKindList
-    plural: newkinds
-    singular: newkind
+    kind: ServerTask
+    listKind: ServerTaskList
+    plural: servertasks
+    singular: servertask
   scope: Namespaced
   versions:
-    - name: v1
-      schema:
-        openAPIV3Schema:
-          description: NewKind is the Schema for the NewKind API
-          properties:
-            apiVersion:
-              description: desc
-              type: string
-            kind:
-              description: desc
-              type: string
-            metadata:
-              type: object
-            spec:
-              description: NewKind defines the desired state of NewKind
-              properties:
-                key:
-                  description: key value which generated using a hash method
-                  type: string
-              type: object
-          type: object
+    - name: v1alpha1
       served: true
       storage: true
       subresources:
-        status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
+        status: { }
+      schema:
+        openAPIV3Schema:
+          description: The Schema for the servertasks API
+          type: object
+          properties:
+            spec:
+              description: ServerTaskSpec defines the desired state of ServerTask
+              type: object
+              properties:
+                operation:
+                  description: The servertask operation.
+                  type: string
+                requestID:
+                  description: The servertask requestId.
+                  type: string
+                serverID:
+                  description: The servertask serverId.
+                  type: string
+                parameters:
+                  type: object
+                  properties:
+                    lockedBy:
+                      type: string
+                    lockReason:
+                      type: string
+                    snapshot:
+                      type: object
+                      properties:
+                        kind:
+                          type: string
+                        name:
+                          type: string
+                        backupType:
+                          type: string
+                        rotation:
+                          format: int32
+                          type: integer
+                        metadata:
+                          type: object
+                          additionalProperties:
+                            type: string
+                    network:
+                      type: object
+                      description: NetworkInServer defines the desired state of Flavor
+                      properties:
+                        netID:
+                          description: network ID.
+                          type: string
+                        portID:
+                          description: port ID.
+                          type: string
+                        portState:
+                          type: string
+                        fixedIps:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              ipAddress:
+                                type: string
+                              subnetID:
+                                type: string
+                        macAddr:
+                          type: string
+                        tag:
+                          type: string
+                    volume:
+                      type: object
+                      properties:
+                        volumeID:
+                          type: string
+                        device:
+                          type: string
+                        tag:
+                          type: string
+                        deleteOnTermination:
+                          type: boolean
+                    migration:
+                      type: object
+                      properties:
+                        targetHost:
+                          type: string
+                        blockMigration:
+                          type: string
+                        flavorID:
+                          type: string
+                        force:
+                          type: boolean
+                        diskConfig:
+                          type: string
+                    rebuild:
+                      type: object
+                      properties:
+                        imageRef:
+                          type: string
+                        diskConfig:
+                          type: string
+                        adminPass:
+                          type: string
+                        name:
+                          type: string
+                        userData:
+                          type: string
+                        keyName:
+                          type: string
+                        preserveEphemeral:
+                          type: boolean
+                        trustedImageCertificates:
+                          type: array
+                          items:
+                            type: string
+                        description:
+                          type: string
+                    metadata:
+                      type: object
+                      additionalProperties:
+                        type: string
+                    adminPass:
+                      type: string
+                    newState:
+                      type: string
+                token:
+                  description: The servertask token
+                  type: object
+                  properties:
+                    projectID:
+                      type: string
+                    userID:
+                      type: string
+                    userName:
+                      type: string
+                    authToken:
+                      type: string
+                    roles:
+                      type: array
+                      items:
+                        type: string
+                    isAdmin:
+                      type: boolean
+                    serviceCatalog:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          type:
+                            type: string
+                          endpoints:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                region:
+                                  type: string
+                                adminURL:
+                                  type: string
+                                internalURL:
+                                  type: string
+                                publicURL:
+                                  type: string
+              required:
+                - operation
+                - requestID
+                - serverID
+                - token
+            status:
+              description: Defines the observed state of ServerTask
+              type: object
+              properties:
+                phase:
+                  description: The servertask phase.
+                  type: string
+                response:
+                  description: The servertask response.
+                  type: string
+                reason:
+                  description: The servertask fail reason.
+                  type: string
+                podStatus:
+                  description: The pod status.
+                  type: object
+                  properties:
+                    status:
+                      description: Status of the operation.
+                      type: string
+                    message:
+                      description: Status of the operation.
+                      type: string
+                    reason:
+                      description: A machine-readable description of why this operation is in the "Failure" status
+                      type: string
+                    code:
+                      description: Suggested HTTP return code for this status, 0 if not set.
+                      type: integer
+      additionalPrinterColumns:
+      - name: operation
+        type: string
+        jsonPath: .spec.operation
+      - name: status
+        type: string
+        jsonPath: .status.phase
+      - name: serverID
+        type: string
+        jsonPath: .spec.serverID
+      - name: age
+        type: date
+        jsonPath: .metadata.creationTimestamp
